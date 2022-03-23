@@ -1,0 +1,10 @@
+<body>
+<h1>Feed Reader</h1>
+<h2><a href="{{.Link}}">{{.Title}}</a></h2>
+{{range .Items}}
+<p>
+  <h3><a href="{{.Link}}">{{.Title}}</a></h3>
+  <div>{{.Description}}</div>
+</p>
+{{end}}
+</body>

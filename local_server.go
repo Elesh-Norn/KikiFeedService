@@ -3,6 +3,7 @@ package main
 import (
   "fmt"
   "net/http"
+  "html/template"
 )
 
 func hello (writer http.ResponseWriter, req *http.Request) {
@@ -18,10 +19,13 @@ func headers(writer http.ResponseWriter, req *http.Request) {
 }
 
 func reader(writer http.ResponseWriter, req *http.Request) {
-  result := OutputFeed()
-  fmt.Fprintf(writer, result)
+  t := template.Must(template.ParseFiles("layout.html"))
+  result, _ := GetFeed("https://emberger.xyz/index.xml")
+
+  t.Execute(writer, result)
 
 }
+
 func main() {
   http.HandleFunc("/hello", hello)
   http.HandleFunc("/headers", headers)
