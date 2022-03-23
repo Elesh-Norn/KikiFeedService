@@ -13,7 +13,7 @@ Everything is in the yaml.config file.
 - articlenumber: Number of article per site to display. Default is 10.
 - title: The title you want your page to appear
 
-### Installing interested
+### Installing 
 
 Clone this repository then follow go instructions to install the code.
 If you don't want to install it just run `go run .` in the folder
