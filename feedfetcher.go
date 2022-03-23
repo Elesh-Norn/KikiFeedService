@@ -20,6 +20,8 @@ type entry struct {
 }
 
 func createEntry(blogTitle string, blogLink string, item *Item) entry {
+  // I just flatten the data struct to be able to have simpler template
+  // and simpler time to sort them
   e := entry{
     BlogTitle: blogTitle,
     BlogLink: blogLink,
@@ -50,7 +52,6 @@ func getFeeds(urls []string) []*Feed {
   for _, url := range(urls){
     feed, err := getFeed(url)
     if err != nil {
-      // Skipping faulty feed
       continue
     }
     result = append(result, feed)
@@ -60,10 +61,10 @@ func getFeeds(urls []string) []*Feed {
 
 
 func getSortedEntries(feeds []*Feed) []entry {
-  // Put all the feeds into a big slice and transform them into entrie
+  // Put all the feeds into a big slice and transform them into entries
   result := make([]entry, 0)
   for _, feed := range feeds {
-    result = append(result, getEntriesForFeed(10, feed)...)
+    result = append(result, getEntriesForFeed(config.ArticleNumber, feed)...)
   }
 
   // Sort the entries from most recent to most ancient
