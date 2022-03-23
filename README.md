@@ -18,9 +18,11 @@ If you don't want to install it just run `go run .` in the folder
 
 ### Usage
 
-kikifeedservice or gun run . without argument will just fetch article and build a static page.
-kikifeedservice -server or go run . -server will launch a local server on default port (8090).
-kikifeedservice -server -port will allows you to choose your own port
+`kikifeedservice` or `gun run .` without argument will just fetch article and build a static page.
+
+`kikifeedservice -server` or `go run . -server` will launch a local server on default port (8090).
+
+`kikifeedservice -server -port` will allows you to choose your own port
 
 There is a lot of room to improve since it's my first time touching go. I wouldn't consider using this for anything serious in this state. I might improve it in the upcoming weeks.
 
