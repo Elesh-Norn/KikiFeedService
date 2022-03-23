@@ -22,10 +22,11 @@ func headers(writer http.ResponseWriter, req *http.Request) {
 func reader(writer http.ResponseWriter, req *http.Request) {
   addresses := []string{
     "https://emberger.xyz/index.xml",
+    //"https://martinfowler.com/feed.atom",
   }
   t := template.Must(template.ParseFiles("layout.html"))
   feeds := getFeeds(addresses)
-  entries:= assembleFeeds(feeds)
+  entries:= getSortedEntries(feeds)
   t.Execute(writer, entries)
 
 }

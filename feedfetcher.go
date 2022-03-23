@@ -2,7 +2,9 @@ package main
 
 import (
         "fmt"
+        "time"
         "github.com/mmcdole/gofeed"
+        "sort"
 )
 
 type Feed = gofeed.Feed
@@ -13,20 +15,20 @@ type entry struct {
   BlogLink string
   Title string
   Link string
-  Published string
+  Published time.Time
   Description string
 }
 
-func createEntry(blogTitle string, blogLink string, item *Item) *entry {
+func createEntry(blogTitle string, blogLink string, item *Item) entry {
   e := entry{
     BlogTitle: blogTitle,
     BlogLink: blogLink,
     Title: item.Title,
     Link: item.Link,
-    Published: item.Published,
+    Published: *item.PublishedParsed,
     Description: item.Description,
   }
-  return &e
+  return e
 }
 
 
@@ -56,19 +58,23 @@ func getFeeds(urls []string) []*Feed {
   return result
 }
 
-func assembleFeeds(feeds []*Feed) []*entry {
-  // Transform Feed Items into entries so I can mix feed together and sort them.
-  result := make([]*entry, 0)
 
+func getSortedEntries(feeds []*Feed) []entry {
+  // Put all the feeds into a big slice and transform them into entrie
+  result := make([]entry, 0)
   for _, feed := range feeds {
     result = append(result, getEntriesForFeed(10, feed)...)
   }
 
+  // Sort the entries from most recent to most ancient
+  sort.Slice(result, func(i, j int) bool{
+    return result[i].Published.After(result[j].Published)
+  })
   return result
 }
 
-func getEntriesForFeed(max int, feed *Feed) []*entry {
-  result := make([]*entry, 0)
+func getEntriesForFeed(max int, feed *Feed) []entry {
+  result := make([]entry, 0)
   if feed.Len() < max {
     max = feed.Len()
   }
