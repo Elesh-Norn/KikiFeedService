@@ -3,12 +3,35 @@ package main
 import (
         "fmt"
         "github.com/mmcdole/gofeed"
-        "strings"
 )
 
 type Feed = gofeed.Feed
+type Item = gofeed.Item
 
-func GetFeed(url string) (*Feed, error) {
+type entry struct {
+  BlogTitle string
+  BlogLink string
+  Title string
+  Link string
+  Published string
+  Description string
+}
+
+func createEntry(blogTitle string, blogLink string, item *Item) *entry {
+  e := entry{
+    BlogTitle: blogTitle,
+    BlogLink: blogLink,
+    Title: item.Title,
+    Link: item.Link,
+    Published: item.Published,
+    Description: item.Description,
+  }
+  return &e
+}
+
+
+func getFeed(url string) (*Feed, error) {
+  // Get 1 Feed
   parser := gofeed.NewParser()
   feed, err := parser.ParseURL(url)
   
@@ -19,24 +42,37 @@ func GetFeed(url string) (*Feed, error) {
   return feed, nil
 }
 
-func OutputFeed() string {
-  feed, err := GetFeed("https://emberger.xyz/index.xml")
-  if err != nil {
-    panic(err)
+func getFeeds(urls []string) []*Feed {
+  // Get a list of Feeds
+  result := make([]*Feed, 0)
+  for _, url := range(urls){
+    feed, err := getFeed(url)
+    if err != nil {
+      continue
+    }
+    result = append(result, feed)
   }
-  max_lenght := 10
-  if feed.Len() < max_lenght {
-    max_lenght = feed.Len()
+  return result
+}
+
+func assembleFeeds(feeds []*Feed) []*entry {
+  // Transform Feed Items into entries so I can mix feed together and sort them.
+  result := make([]*entry, 0)
+
+  for _, feed := range feeds {
+    result = append(result, getEntriesForFeed(10, feed)...)
   }
 
-  result := ""
-  
-  for i:= 0; i <= max_lenght - 1; i++ {
-    article := feed.Items[i]
-    result = strings.Join([]string{ result, "------------", article.Title, article.Description}, "\n")
+  return result
+}
+
+func getEntriesForFeed(max int, feed *Feed) []*entry {
+  result := make([]*entry, 0)
+  if feed.Len() < max {
+    max = feed.Len()
   }
-  if result == "" {
-    result = "Nothing found."
+  for _, e := range feed.Items[:max] {
+    result = append(result, createEntry(feed.Title, feed.Link, e))
   }
   return result
 }
