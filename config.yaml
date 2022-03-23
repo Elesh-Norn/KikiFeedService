@@ -1,0 +1,5 @@
+adresses:
+        - "https://emberger.xyz/index.xml"
+        - "https://martinfowler.com/feed.atom"
+articlenumber: 10
+title: "Ember's Feed Aggregator"
