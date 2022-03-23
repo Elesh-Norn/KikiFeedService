@@ -1,29 +1,10 @@
-package main
+package main 
 
 import (
   "encoding/json"
   "os"
-  "gopkg.in/yaml.v2"
 )
 
-type Config struct {
-  Adresses []string
-  ArticleNumber int
-  Title string
-}
-
-func load_config() Config{
-  file, err := os.ReadFile("config.yaml")
-  if err != nil {
-    panic(err)
-  }
-  var c Config
-  if err := yaml.Unmarshal(file, &c);
-  err != nil {
-    panic(err)
-  }
-  return c
-}
 
 func dump_entry(entries []entry) []byte{
   serial, _ := json.Marshal(entries)
