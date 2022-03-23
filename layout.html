@@ -1,10 +1,17 @@
+<head>
+  <meta content="utf-8" name=charset>
+  <title>My Feed Reader</title>
+</head>
+
+<header>
+  <h1>My Feed</h1>
+</header>
 <body>
-<h1>Feed Reader</h1>
-<h2><a href="{{.Link}}">{{.Title}}</a></h2>
-{{range .Items}}
+{{ range . }}
 <p>
   <h3><a href="{{.Link}}">{{.Title}}</a></h3>
   <div>{{.Description}}</div>
+  <small><a href="{{.BlogLink}}">{{.BlogTitle}}</a></small>
 </p>
-{{end}}
+{{ end }}
 </body>

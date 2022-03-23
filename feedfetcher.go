@@ -36,7 +36,7 @@ func getFeed(url string) (*Feed, error) {
   feed, err := parser.ParseURL(url)
   
   if err != nil {
-    fmt.Println("Something went wrong parsing the feed at requested url")
+    fmt.Println("Something went wrong parsing the feed at requested url: %v", url)
     return nil , err
   }
   return feed, nil
@@ -48,6 +48,7 @@ func getFeeds(urls []string) []*Feed {
   for _, url := range(urls){
     feed, err := getFeed(url)
     if err != nil {
+      // Skipping faulty feed
       continue
     }
     result = append(result, feed)

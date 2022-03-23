@@ -6,6 +6,7 @@ import (
   "html/template"
 )
 
+
 func hello (writer http.ResponseWriter, req *http.Request) {
   fmt.Fprintf(writer, "hello\n")
 }
@@ -19,10 +20,13 @@ func headers(writer http.ResponseWriter, req *http.Request) {
 }
 
 func reader(writer http.ResponseWriter, req *http.Request) {
+  addresses := []string{
+    "https://emberger.xyz/index.xml",
+  }
   t := template.Must(template.ParseFiles("layout.html"))
-  result, _ := GetFeed("https://emberger.xyz/index.xml")
-
-  t.Execute(writer, result)
+  feeds := getFeeds(addresses)
+  entries:= assembleFeeds(feeds)
+  t.Execute(writer, entries)
 
 }
 
