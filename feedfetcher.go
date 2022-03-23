@@ -2,25 +2,37 @@ package main
 
 import (
         "fmt"
-        "bufio"
-        "net/http"
+        "github.com/mmcdole/gofeed"
 )
 
-func main() {
-  resp, err := http.Get("https://emberger.xyz/index.xml")
+type Feed = gofeed.Feed
+
+func GetFeed(url string) (*Feed, error) {
+  parser := gofeed.NewParser()
+  feed, err := parser.ParseURL(url)
+  
+  if err != nil {
+    fmt.Println("Something went wrong parsing the feed at requested url")
+    return nil , err
+  }
+  return feed, nil
+}
+
+func main(){
+  feed, err := GetFeed("https://emberger.xyz/index.xml")
   if err != nil {
     panic(err)
   }
-  defer resp.Body.Close()
-
-  fmt.Println("Response status:", resp.Status)
-
-  scanner := bufio.NewScanner(resp.Body)
-  for i := 0; scanner.Scan() && i < 5; i++ {
-    fmt.Println(scanner.Text())
+  fmt.Println(feed.Title)
+  max_lenght := 10
+  if feed.Len() < max_lenght {
+    max_lenght = feed.Len()
   }
 
-  if err := scanner.Err(); err != nil {
-    panic(err)
+  for i:= 0; i <= max_lenght - 1; i++ {
+    article := feed.Items[i]
+    fmt.Println("------------")
+    fmt.Println(article.Title)
+    fmt.Println(article.Description)
   }
 }
