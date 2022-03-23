@@ -3,6 +3,7 @@ package main
 import (
         "fmt"
         "github.com/mmcdole/gofeed"
+        "strings"
 )
 
 type Feed = gofeed.Feed
@@ -18,21 +19,24 @@ func GetFeed(url string) (*Feed, error) {
   return feed, nil
 }
 
-func main(){
+func OutputFeed() string {
   feed, err := GetFeed("https://emberger.xyz/index.xml")
   if err != nil {
     panic(err)
   }
-  fmt.Println(feed.Title)
   max_lenght := 10
   if feed.Len() < max_lenght {
     max_lenght = feed.Len()
   }
 
+  result := ""
+  
   for i:= 0; i <= max_lenght - 1; i++ {
     article := feed.Items[i]
-    fmt.Println("------------")
-    fmt.Println(article.Title)
-    fmt.Println(article.Description)
+    result = strings.Join([]string{ result, "------------", article.Title, article.Description}, "\n")
   }
+  if result == "" {
+    result = "Nothing found."
+  }
+  return result
 }
