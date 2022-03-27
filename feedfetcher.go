@@ -5,6 +5,7 @@ import (
         "time"
         "github.com/mmcdole/gofeed"
         "sort"
+        "sync"
 )
 
 type Feed = gofeed.Feed
@@ -40,22 +41,39 @@ func getFeed(url string) (*Feed, error) {
   feed, err := parser.ParseURL(url)
   
   if err != nil {
-    fmt.Println("Something went wrong parsing the feed at requested url: %v", url)
+    fmt.Printf("Something went wrong parsing the feed at requested url: %v \n", url)
     return nil , err
   }
+  fmt.Printf("Succesfully fetched requested url: %v \n", url)
   return feed, nil
 }
 
 func getFeeds(urls []string) []*Feed {
   // Get a list of Feeds
   result := make([]*Feed, 0)
+  
+  var wg sync.WaitGroup
+  
   for _, url := range(urls){
-    feed, err := getFeed(url)
-    if err != nil {
-      continue
-    }
-    result = append(result, feed)
+    
+    wg.Add(1)
+    // To avoid passing the same instance of the variable to 
+    // each closure we need to initialise  an ew variable
+    // https://go.dev/doc/faq#closures_and_goroutines
+    url := url  
+    go func() {
+      defer wg.Done()
+      feed, err := getFeed(url)
+      if err != nil {
+        return
+      }
+      result = append(result, feed)
+    }()
+
   }
+
+  wg.Wait()
+  
   return result
 }
 
