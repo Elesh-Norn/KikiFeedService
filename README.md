@@ -29,6 +29,6 @@ If you don't want to install it just run `go run .` in the folder
 There is a lot of room to improve since it's my first time touching go. I wouldn't consider using this for anything serious in this state. I might improve it in the upcoming weeks.
 
 I could: 
-- Use goroutines to fetch the site (it's basic and important go, so I need to learn it).
+- ~~ Use goroutines to fetch the site (it's basic and important go, so I need to learn it). ~~
 - Have a Custom User Agent.
 - Make the project easily deployable online and poll once a day.
