@@ -3,6 +3,7 @@
 This learning project (to teach myself go) is a RSS aggregator. I've built it because most feed Readers are really wonky (reading the article almost never work either because of the reader, or the website followed). Plus it contains tons of features I don't need, I just want stuff under my radar and not having to mark 400 articles on read.
 
 This project, when ran, will fetch each rss feed you are interested and build a simple html page, listing every article polled, sorted by most recent.
+
 ![example](examplepicture.jpg)
 
 ## Configuring it
@@ -12,7 +13,7 @@ Everything is in the yaml.config file.
 - articlenumber: Number of article per site to display. Default is 10.
 - title: The title you want your page to appear
 
-### Installing interested
+### Installing 
 
 Clone this repository then follow go instructions to install the code.
 If you don't want to install it just run `go run .` in the folder
