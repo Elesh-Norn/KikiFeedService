@@ -1,7 +1,7 @@
 package main
 
 import (
-  "fmt"
+  "log"
   "flag"
   "os"
   "gopkg.in/yaml.v2"
@@ -42,15 +42,25 @@ func build() {
   feeds := getFeeds(config.Adresses)
   entries:= getSortedEntries(feeds)
   file, err := os.Create("static/index.html")
-  
+  logFile := getLogFile()
+  log.SetOutput(logFile)
+
   if err != nil {
-    fmt.Println("Building failed.")
-    fmt.Println(err)
+    log.Println("Building failed.")
+    log.Println(err)
     return
   }
   
   t.Execute(file, context{Entries: entries, Title: config.Title})
-  fmt.Println("Built!")
+  log.Println("Built!")
+}
+
+func getLogFile() (*os.File) {
+  file, err := os.OpenFile("KikiFeedService.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+  if err !=nil {
+    log.Fatal(err)
+  }
+  return file
 }
 
 func main() {
@@ -58,6 +68,7 @@ func main() {
   
   config = load_config()
   build()
+  
   if *help {
     flag.Usage()
     os.Exit(0)

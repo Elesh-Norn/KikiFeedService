@@ -1,7 +1,7 @@
 package main 
 
 import (
-        "fmt"
+        "log"
         "time"
         "github.com/mmcdole/gofeed"
         "sort"
@@ -39,12 +39,13 @@ func getFeed(url string) (*Feed, error) {
   // Get 1 Feed
   parser := gofeed.NewParser()
   feed, err := parser.ParseURL(url)
-  
+  logFile := getLogFile()
+  log.SetOutput(logFile)
   if err != nil {
-    fmt.Printf("Something went wrong parsing the feed at requested url: %v \n", url)
+    log.Printf("Something went wrong parsing the feed at requested url: %v \n", url)
     return nil , err
   }
-  fmt.Printf("Succesfully fetched requested url: %v \n", url)
+  log.Printf("Succesfully fetched requested url: %v \n", url)
   return feed, nil
 }
 
