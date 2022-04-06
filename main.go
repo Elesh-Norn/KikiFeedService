@@ -6,6 +6,7 @@ import (
   "os"
   "gopkg.in/yaml.v2"
   "html/template"
+  "path/filepath"
 )
 type Config struct {
   Adresses []string
@@ -19,7 +20,8 @@ type context struct {
 }
 
 func load_config() Config{
-  file, err := os.ReadFile("config.yaml")
+  configPath := filepath.Join(getExecutableDirPath(), "config.yaml")
+  file, err := os.ReadFile(configPath)
   if err != nil {
     panic(err)
   }
@@ -38,10 +40,12 @@ var help = flag.Bool("help", false, "Show help")
 
 func build() {
   // build the static site after polling each feed
-  t := template.Must(template.ParseFiles("templates/layout.html"))
+  tPath := filepath.Join(getExecutableDirPath(), "templates/layout.html")
+  sPath := filepath.Join(getExecutableDirPath(), "static/index.html")
+  t := template.Must(template.ParseFiles(tPath))
   feeds := getFeeds(config.Adresses)
   entries:= getSortedEntries(feeds)
-  file, err := os.Create("static/index.html")
+  file, err := os.Create(sPath)
   logFile := getLogFile()
   log.SetOutput(logFile)
 
@@ -55,8 +59,17 @@ func build() {
   log.Println("Built!")
 }
 
+func getExecutableDirPath() (string) {
+  ex, err := os.Executable()
+  if err != nil {
+    panic(err)
+  }
+  return filepath.Dir(ex)
+}
+
 func getLogFile() (*os.File) {
-  file, err := os.OpenFile("KikiFeedService.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+  logPath := filepath.Join(getExecutableDirPath(), "KikiFeedService.log")
+  file, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
   if err !=nil {
     log.Fatal(err)
   }
