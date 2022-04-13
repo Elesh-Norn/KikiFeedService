@@ -6,6 +6,7 @@ import (
         "github.com/mmcdole/gofeed"
         "sort"
         "sync"
+        "regexp"
 )
 
 type Feed = gofeed.Feed
@@ -23,13 +24,20 @@ type entry struct {
 func createEntry(blogTitle string, blogLink string, item *Item) entry {
   // I just flatten the data struct to be able to have simpler template
   // and simpler time to sort them
+  description := item.Description
+  r := regexp.MustCompile("[^<]+[/>$]")
+  if r.MatchString(description) {
+    description = ""
+  }
+  // Sometimes rss feed put their whole article in html format in the
+  // description field. I don't want to see the article in my tool.
   e := entry{
     BlogTitle: blogTitle,
     BlogLink: blogLink,
     Title: item.Title,
     Link: item.Link,
     Published: *item.PublishedParsed,
-    Description: item.Description,
+    Description: description,
   }
   return e
 }
