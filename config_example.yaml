@@ -3,3 +3,4 @@ adresses:
         - "https://martinfowler.com/feed.atom"
 articlenumber: 10
 title: "Ember's Feed Aggregator"
+useragent: "KikiFeedService https://github.com/Elesh-Norn/KikiFeedService rss feed aggregator"

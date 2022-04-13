@@ -11,6 +11,7 @@ import (
 
 type Feed = gofeed.Feed
 type Item = gofeed.Item
+type Parser = gofeed.Parser
 
 type entry struct {
   BlogTitle string
@@ -43,9 +44,8 @@ func createEntry(blogTitle string, blogLink string, item *Item) entry {
 }
 
 
-func getFeed(url string) (*Feed, error) {
+func getFeed(url string, parser *Parser) (*Feed, error) {
   // Get 1 Feed
-  parser := gofeed.NewParser()
   feed, err := parser.ParseURL(url)
   logFile := getLogFile()
   log.SetOutput(logFile)
@@ -57,10 +57,11 @@ func getFeed(url string) (*Feed, error) {
   return feed, nil
 }
 
-func getFeeds(urls []string) []*Feed {
+func getFeeds(urls []string, userAgent string) []*Feed {
   // Get a list of Feeds
   result := make([]*Feed, 0)
-  
+  parser := gofeed.NewParser()
+  parser.UserAgent = userAgent 
   var wg sync.WaitGroup
   
   for _, url := range(urls){
@@ -72,7 +73,7 @@ func getFeeds(urls []string) []*Feed {
     url := url  
     go func() {
       defer wg.Done()
-      feed, err := getFeed(url)
+      feed, err := getFeed(url, parser)
       if err != nil {
         return
       }

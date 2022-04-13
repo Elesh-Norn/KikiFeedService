@@ -12,6 +12,7 @@ type Config struct {
   Adresses []string
   ArticleNumber int
   Title string
+  UserAgent string
 }
 
 type context struct {
@@ -43,7 +44,7 @@ func build() {
   tPath := filepath.Join(getExecutableDirPath(), "templates/layout.html")
   sPath := filepath.Join(getExecutableDirPath(), "static/index.html")
   t := template.Must(template.ParseFiles(tPath))
-  feeds := getFeeds(config.Adresses)
+  feeds := getFeeds(config.Adresses, config.UserAgent)
   entries:= getSortedEntries(feeds)
   file, err := os.Create(sPath)
   logFile := getLogFile()

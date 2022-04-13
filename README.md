@@ -8,11 +8,11 @@ This project, when ran, will fetch each rss feed you are interested and build a 
 
 ## Configuring it
 
-Everything is in the yaml.config file.
+Everything is in the yaml.config file. Rename or copy the example to config.yaml.
 - adresses must be the rss feed. Must be between parenthesis.
 - articlenumber: Number of article per site to display. Default is 10.
 - title: The title you want your page to appear
-
+- useragent: You can customise how you want to appear, so people recognize you.
 ### Installing 
 
 Clone this repository then follow go instructions to install the code.
@@ -32,4 +32,4 @@ I could:
 - ~~Use goroutines to fetch the site (it's basic and important go, so I need to learn it).~~ 
 - ~~Make the project easily deployable online and poll once a day.~~ (Deployed this on a private 
 server and ran it with a cron job. Accessible at rss.emberger.xyz).
-- Have a Custom User Agent.
+- ~~Have a Custom User Agent.~~
