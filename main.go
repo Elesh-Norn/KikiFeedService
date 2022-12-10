@@ -10,6 +10,7 @@ import (
 )
 type Config struct {
   Adresses []string
+  Videos []string
   ArticleNumber int
   Title string
   UserAgent string
@@ -39,24 +40,27 @@ var server = flag.Bool("server", false, "Build and then launch local server")
 var port = flag.Int("port", 8090, "Port for the server")
 var help = flag.Bool("help", false, "Show help")
 
-func build() {
+func build(templatePath string, staticPath string, topic []string) {
   // build the static site after polling each feed
-  tPath := filepath.Join(getExecutableDirPath(), "templates/layout.html")
-  sPath := filepath.Join(getExecutableDirPath(), "static/index.html")
+  tPath := filepath.Join(getExecutableDirPath(), templatePath)
+  sPath := filepath.Join(getExecutableDirPath(), )
+  
   t := template.Must(template.ParseFiles(tPath))
-  feeds := getFeeds(config.Adresses, config.UserAgent)
+  feeds := getFeeds(topic, config.UserAgent)
   entries:= getSortedEntries(feeds)
+  
   file, err := os.Create(sPath)
   logFile := getLogFile()
   log.SetOutput(logFile)
 
   if err != nil {
-    log.Println("Building failed.")
+    log.Println("Text entries building failed.")
     log.Println(err)
     return
   }
   
   t.Execute(file, context{Entries: entries, Title: config.Title})
+
   log.Println("Built!")
 }
 
@@ -81,8 +85,9 @@ func main() {
   flag.Parse()
   
   config = load_config()
-  build()
-  
+  build("templates/layout.html", "static/index.html", config.Adresses)
+  build("templates/video_feed.html", "static/video_feed.html", config.Videos)
+
   if *help {
     flag.Usage()
     os.Exit(0)

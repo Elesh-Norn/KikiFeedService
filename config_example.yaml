@@ -1,6 +1,9 @@
 adresses:
         - "https://emberger.xyz/index.xml"
         - "https://martinfowler.com/feed.atom"
+videos:
+        - "https://www.youtube.com/feeds/videos.xml?channel_id=UClOGLGPOqlAiLmOvXW5lKbw"
+
 articlenumber: 10
 title: "Ember's Feed Aggregator"
 useragent: "KikiFeedService https://github.com/Elesh-Norn/KikiFeedService rss feed aggregator"
