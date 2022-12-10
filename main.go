@@ -43,7 +43,7 @@ var help = flag.Bool("help", false, "Show help")
 func build(templatePath string, staticPath string, topic []string) {
   // build the static site after polling each feed
   tPath := filepath.Join(getExecutableDirPath(), templatePath)
-  sPath := filepath.Join(getExecutableDirPath(), )
+  sPath := filepath.Join(getExecutableDirPath(), staticPath )
   
   t := template.Must(template.ParseFiles(tPath))
   feeds := getFeeds(topic, config.UserAgent)
