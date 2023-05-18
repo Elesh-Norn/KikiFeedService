@@ -7,6 +7,7 @@ import (
         "sort"
         "sync"
         "regexp"
+        "net/http"
 )
 
 type Feed = gofeed.Feed
@@ -46,7 +47,21 @@ func createEntry(blogTitle string, blogLink string, item *Item) entry {
 
 func getFeed(url string, parser *Parser) (*Feed, error) {
   // Get 1 Feed
-  feed, err := parser.ParseURL(url)
+  log.Printf(url)
+  log.Printf("wah")
+  client := &http.Client
+  req, err := http.NewRequest("GET", url, nil)
+  req.Header.Add("If-None-Match", `W/"wyzzy"`)
+  resp, err := client.Do(req)
+  if err != nil {
+    log.Printf("error", url)
+  }
+  log.Printf(resp.Status, url)
+  for k,v := range resp.Header {
+  log.Printf(string(k), v)
+}
+  
+  feed, err := parser.Parse(resp.Body)
   logFile := getLogFile()
   log.SetOutput(logFile)
   if err != nil {
