@@ -68,10 +68,9 @@ func getResponses(urls []string, lastResponses map[string]feedResponse, userAgen
     go func() {
       defer wg.Done()
       resp, err := fetchFeed(url, lastResponses, userAgent)
-      if err != nil {
-        return
+      if err == nil {
+	result = append(result, resp)
       }
-      result = append(result, resp)
     }()
   }
 
@@ -92,20 +91,27 @@ func fetchFeed(url string, lastResponses map[string]feedResponse, userAgent stri
     req.Header.Add("If-None-Match", oldResponse.ETag)
     req.Header.Add("If-Modified-Since", oldResponse.LastModified)
   }
-  
+  log.Printf("Trying to fetch " + url)
+
   resp, err := client.Do(req)
   if err != nil {
     log.Printf("Error with "+ url)
-    log.Printf(resp.Status, url)
+    log.Printf("%v", err)
     if ok {
+	    log.Printf("Old")
       return oldResponse, nil
     }
+    log.Printf("Abububu")
     return feedResponse{"", "", "", ""}, err
   }
   if resp.StatusCode == 304 {
     log.Printf("Wasn't modified since last time " + url)
     return oldResponse, nil
   }
+  if resp.StatusCode == 429 {
+	  log.Printf("Too many request for " + url)
+	  return feedResponse{"", "", "", ""}, err
+	  }
   bytes, _ := io.ReadAll(resp.Body)
   b := string(bytes)
   newLastResponse := feedResponse{url, resp.Header.Get("Last-Modified"), resp.Header.Get("Etag"),b}
