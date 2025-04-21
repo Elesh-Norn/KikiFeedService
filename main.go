@@ -7,6 +7,7 @@ import (
   "gopkg.in/yaml.v2"
   "html/template"
   "path/filepath"
+  "encoding/json"
 )
 type Config struct {
   Adresses []string
@@ -35,7 +36,22 @@ func load_config() Config{
   return c
 }
 
+func load_last_Responses() map[string]feedResponse{
+  store_path := filepath.Join(getExecutableDirPath(), "stored_responses.json")
+  file, err := os.ReadFile(store_path)
+  if err != nil {
+    panic(err)
+  }
+  var responses map[string]feedResponse
+  if err = json.Unmarshal(file, &responses); err != nil {
+    panic(err)
+  }
+  return responses
+}
+
 var config Config
+var lastResponses map[string]feedResponse
+var newLastResponses []feedResponse
 var server = flag.Bool("server", false, "Build and then launch local server")
 var port = flag.Int("port", 8090, "Port for the server")
 var help = flag.Bool("help", false, "Show help")
@@ -46,7 +62,11 @@ func build(templatePath string, staticPath string, topic []string) {
   sPath := filepath.Join(getExecutableDirPath(), staticPath )
   
   t := template.Must(template.ParseFiles(tPath))
-  feeds := getFeeds(topic, config.UserAgent)
+  responses := getResponses(topic, lastResponses, config.UserAgent)
+  for _, r := range(responses){
+    newLastResponses = append(newLastResponses, r)
+  }
+  feeds := parseFeeds(responses)
   entries:= getSortedEntries(feeds)
   
   file, err := os.Create(sPath)
@@ -64,6 +84,19 @@ func build(templatePath string, staticPath string, topic []string) {
   log.Println("Built!")
 }
 
+func saveResponsesAsJson(responses []feedResponse){
+  storePath := filepath.Join(getExecutableDirPath(), "stored_responses.json")
+  responseMap := make(map[string]feedResponse)
+  log.Println("Start")
+  for _ , v := range(newLastResponses){
+    log.Println(v.Url)
+    responseMap[v.Url] = v
+  }
+  file, _ := os.OpenFile(storePath, os.O_CREATE|os.O_WRONLY, 0644)
+  defer file.Close()
+  encoder := json.NewEncoder(file)
+  encoder.Encode(responseMap)
+}
 func getExecutableDirPath() (string) {
   ex, err := os.Executable()
   if err != nil {
@@ -85,9 +118,10 @@ func main() {
   flag.Parse()
   
   config = load_config()
+  lastResponses = load_last_Responses()
   build("templates/layout.html", "static/index.html", config.Adresses)
   build("templates/video_feed.html", "static/video_feed.html", config.Videos)
-
+  saveResponsesAsJson(newLastResponses)
   if *help {
     flag.Usage()
     os.Exit(0)
