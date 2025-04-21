@@ -1,12 +1,14 @@
 package main 
 
 import (
+        "io"
         "log"
         "time"
         "github.com/mmcdole/gofeed"
         "sort"
         "sync"
         "regexp"
+        "net/http"
 )
 
 type Feed = gofeed.Feed
@@ -20,6 +22,14 @@ type entry struct {
   Link string
   Published time.Time
   Description string
+  }
+
+type feedResponse struct {
+  Url string
+  LastModified string
+  ETag string
+  Body string
+
 }
 
 func createEntry(blogTitle string, blogLink string, item *Item) entry {
@@ -43,25 +53,9 @@ func createEntry(blogTitle string, blogLink string, item *Item) entry {
   return e
 }
 
-
-func getFeed(url string, parser *Parser) (*Feed, error) {
-  // Get 1 Feed
-  feed, err := parser.ParseURL(url)
-  logFile := getLogFile()
-  log.SetOutput(logFile)
-  if err != nil {
-    log.Printf("Something went wrong parsing the feed at requested url: %v \n", url)
-    return nil , err
-  }
-  log.Printf("Succesfully fetched requested url: %v \n", url)
-  return feed, nil
-}
-
-func getFeeds(urls []string, userAgent string) []*Feed {
+func getResponses(urls []string, lastResponses map[string]feedResponse, userAgent string) ([]feedResponse){
   // Get a list of Feeds
-  result := make([]*Feed, 0)
-  parser := gofeed.NewParser()
-  parser.UserAgent = userAgent 
+  result := []feedResponse{}
   var wg sync.WaitGroup
   
   for _, url := range(urls){
@@ -73,13 +67,11 @@ func getFeeds(urls []string, userAgent string) []*Feed {
     url := url  
     go func() {
       defer wg.Done()
-      feed, err := getFeed(url, parser)
-      if err != nil {
-        return
+      resp, err := fetchFeed(url, lastResponses, userAgent)
+      if err == nil {
+	result = append(result, resp)
       }
-      result = append(result, feed)
     }()
-
   }
 
   wg.Wait()
@@ -87,6 +79,70 @@ func getFeeds(urls []string, userAgent string) []*Feed {
   return result
 }
 
+
+func fetchFeed(url string, lastResponses map[string]feedResponse, userAgent string) (feedResponse, error ){
+  
+  client := http.Client{}
+  req, err := http.NewRequest("GET", url, nil)
+  req.Header.Add("User-Agent", userAgent)
+  oldResponse , ok := lastResponses[url]
+
+  if ok {
+    req.Header.Add("If-None-Match", oldResponse.ETag)
+    req.Header.Add("If-Modified-Since", oldResponse.LastModified)
+  }
+  log.Printf("Trying to fetch " + url)
+
+  resp, err := client.Do(req)
+  if err != nil {
+    log.Printf("Error with "+ url)
+    log.Printf("%v", err)
+    if ok {
+	    log.Printf("Old")
+      return oldResponse, nil
+    }
+    log.Printf("Abububu")
+    return feedResponse{"", "", "", ""}, err
+  }
+  if resp.StatusCode == 304 {
+    log.Printf("Wasn't modified since last time " + url)
+    return oldResponse, nil
+  }
+  if resp.StatusCode == 429 {
+	  log.Printf("Too many request for " + url)
+	  return feedResponse{"", "", "", ""}, err
+	  }
+  bytes, _ := io.ReadAll(resp.Body)
+  b := string(bytes)
+  newLastResponse := feedResponse{url, resp.Header.Get("Last-Modified"), resp.Header.Get("Etag"),b}
+  log.Printf("Succesfully fetched new "+ url)
+  return newLastResponse, nil
+}
+
+func parseFeed(url string, body string, parser *Parser) (*Feed, error) {
+  // Get 1 Feed
+  feed, err := parser.ParseString(body)
+  if err != nil {
+    log.Printf("Something went wrong parsing the feed at requested url: %v \n", url)
+    return nil , err
+  }
+  return feed, nil
+}
+
+
+func parseFeeds(lastResponses []feedResponse) []*Feed {
+  // Get a list of Feeds
+  result := make([]*Feed, 0)
+  parser := gofeed.NewParser()
+  for _, r := range(lastResponses){
+      feed, err := parseFeed(r.Url, r.Body, parser)
+      if err != nil {
+        continue
+      }
+      result = append(result, feed)
+    }
+  return result
+}
 
 func getSortedEntries(feeds []*Feed) []entry {
   // Put all the feeds into a big slice and transform them into entries
