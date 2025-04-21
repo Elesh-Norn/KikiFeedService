@@ -55,7 +55,7 @@ func createEntry(blogTitle string, blogLink string, item *Item) entry {
 
 func getResponses(urls []string, lastResponses map[string]feedResponse, userAgent string) ([]feedResponse){
   // Get a list of Feeds
-  result := make([]feedResponse, 0)
+  result := []feedResponse{}
   var wg sync.WaitGroup
   
   for _, url := range(urls){
@@ -106,7 +106,7 @@ func fetchFeed(url string, lastResponses map[string]feedResponse, userAgent stri
     log.Printf("Wasn't modified since last time " + url)
     return oldResponse, nil
   }
-  bytes, err := io.ReadAll(resp.Body)
+  bytes, _ := io.ReadAll(resp.Body)
   b := string(bytes)
   newLastResponse := feedResponse{url, resp.Header.Get("Last-Modified"), resp.Header.Get("Etag"),b}
   log.Printf("Succesfully fetched new "+ url)
